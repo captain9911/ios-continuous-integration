@@ -1,0 +1,40 @@
+name: release ipa action
+on: [workflow_dispatch, push]
+jobs:
+  dosometh:
+    name: release ipa to pgyer
+    runs-on: macOS-latest
+    # runs-on: macOS-11.6.5
+    steps:
+      - name: macOS version
+        run: sw_vers
+      - name: Xcode version
+        run: xcodebuild -version
+      - name: pod version
+        run: pod --version
+      # - name: install xcpretty
+      #   run: gem install xcpretty
+      - name: checkout repository
+        uses: actions/checkout@v2
+      - name: install certificate
+        # 参数1：开发证书名称 
+        # 参数2：证书密码 
+        # 参数3：mac钥匙串登录密码（GitHub为""）
+        run: ./script/installCertificate.sh "dev.p12" "cerpwd" ""
+      - name: install profile
+        # 参数1：描述文件名称
+        run: ./script/installProfile.sh "dev.mobileprovision"
+      - name: clone project
+        # 参数1：工程名称 
+        # 参数2：工程git地址(https://用户名:密码@仓库地址)
+        run: ./script/cloneProject.sh "IOSProjectDemo" "https://captain9911:password@gitee.com/captain9911/iosprojectdemo.git"
+      - name: archive project
+        # 参数1：描述文件名称
+        # 参数2：工程名称
+        # 参数3：仓库本地路径（GitHub不需要这个参数，传""）
+        run: ./script/archive.sh "dev.mobileprovision" "IOSProjectDemo" ""
+      - name: publish ipa
+        # 参数1：工程名称 
+        # 参数2：蒲公英ApiKey
+        run: ./script/publish.sh "IOSProjectDemo" "key"
+      
